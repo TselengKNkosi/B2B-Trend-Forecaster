@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+  <meta charset = "UTF-8">
+  <meta name = "viewport" content = "width=device-width, initial-scale=1">
+  <title>Trend Forecaster Dashboard</title>
+  <style>
+    :root {
+      --cream: #F5EEE0;
+      --paper: #FBF6EA;
+      --sand: #E2D3B8;
+      --maroon: #6B1426;
+      --deep: #45101C;
+      --rose: #B5586A;
+      --ink: #2B1A1D;
+      --muted: #7A6264;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 100vh;
+      background: var(--cream);
+      color: var(--ink);
+      font: 15px;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    h1, h2, h3, .serif {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    aside {
+      background: var(--maroon);
+      color: var(--cream);
+      padding: 28px 24px;
+    }
+
+    aside h1 {
+      font-size: 1.7rem;
+      line-height: 1.15;
+    }
+
+    aside p {
+      color: var(--sand);
+      margin: 0.4rem 0 1.4rem;
+    }
+
+    label {
+      display: block;
+      margin: 0.9rem 0 0.25rem;
+      font-size: 0.85rem;
+      color: var(--sand);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid #8c3445;
+      border-radius: 6px;
+      background: var(--deep);
+      color: var(--cream);
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 64px;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus, button:focus-visible {
+      outline: 2px solid var(--cream);
+      outline-offset: 2px;
+    }
+
+    button {
+      margin-top: 1.3rem;
+      width: 100%;
+      padding: 11px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--cream);
+      color: var(--maroon);
+      font: 600 1rem Georgia, serif;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    main {
+      padding: 32px 5vw;
+      max-width: 1100px;
+    }
+
+    .err {
+      border-left: 4px solid var(--maroon);
+      padding: 10px 14px;
+      background: var(--paper);
+      margin-bottom: 1rem;
+      color: var(--maroon);
+      font-weight: 500;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-family: Georgia, serif;
+      font-size: 1.2rem;
+      margin-top: 20vh;
+      text-align: center;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-bottom: 2px solid var(--maroon);
+      padding-bottom: 12px;
+    }
+
+    .top h2 {
+      font-size: 2.2rem;
+      color: var(--deep);
+      text-transform: capitalize;
+    }
+
+    .top span {
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    .gate {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      border: 1.5px solid var(--maroon);
+    }
+
+    .gate.ok {
+      background: var(--maroon);
+      color: var(--cream);
+    }
+
+    .gate.review {
+      background: var(--paper);
+      color: var(--maroon);
+    }
+
+    .verdicts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin: 24px 0;
+      background: var(--paper);
+      border: 1px solid var(--sand);
+      border-radius: 10px;
+    }
+
+    .verdicts > div {
+      padding: 18px 20px;
+      text-align: center;
+    }
+
+    .verdicts > div + div {
+      border-left: 1px solid var(--sand);
+    }
+
+    .verdicts h3 {
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .big {
+      font-family: Georgia, serif;
+      font-size: 2.4rem;
+      color: var(--maroon);
+      margin: 0.5rem 0;
+    }
+
+    .track {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-top: 1.1rem;
+    }
+
+    .track:before {
+      content: "";
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      top: 9px;
+      height: 2px;
+      background: var(--sand);
+    }
+
+    .track i {
+      position: relative;
+      flex: 1;
+      font-style: normal;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .track i:before {
+      content: "";
+      display: block;
+      width: 18px;
+      height: 18px;
+      margin: 0 auto 4px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 2px solid var(--sand);
+    }
+
+    .track i.on {
+      color: var(--maroon);
+      font-weight: 600;
+    }
+
+    .track i.on:before {
+      background: var(--maroon);
+      border-color: var(--maroon);
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+    }
+
+    .charts h3, .conf h3, .brief h3 {
+      font-size: 1.15rem;
+      color: var(--deep);
+      margin-bottom: 6px;
+    }
+
+    .charts small {
+      color: var(--muted);
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .conf {
+      margin: 28px 0;
+    }
+
+    .bar {
+      display: grid;
+      grid-template-columns: 190px 1fr 50px;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0;
+    }
+
+    .track2 {
+      position: relative;
+      height: 12px;
+      background: var(--sand);
+      border-radius: 6px;
+    }
+
+    .track2 b {
+      display: block;
+      height: 100%;
+      border-radius: 6px;
+      background: var(--maroon);
+    }
+
+    .track2 b.low {
+      background: var(--rose);
+    }
+
+    .track2 u {
+      position: absolute;
+      top: -4px;
+      bottom: -4px;
+      width: 2px;
+      background: var(--deep);
+    }
+
+    .brief {
+      border-top: 2px solid var(--maroon);
+      padding-top: 14px;
+    }
+
+    .brief p {
+      font-family: Georgia, serif;
+      font-size: 1.02rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      max-width: 70ch;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <h1>Trend Forecaster</h1>
+    <p>Beauty and fashion signals, turned into decisions.</p>
+
+    <label for="key">API Key</label>
+    <input id="key" type="password" autocomplete="off" placeholder="Found in your .env API_KEYS">
+
+    <label for="name">Trend Name</label>
+  <input id="name" value="glass skin">
+  
+    <label for="cat">Category</label>
+    <select id="cat">
+      <option value="beauty">beauty</option>
+      <option value="fashion">fashion</option>
+    </select>
+  
+    <label for="si">Search Index (weekly, 8+ values)</label>
+    <textarea id="si">20, 22, 21, 25, 30, 38, 47, 60</textarea>
+  
+    <label for="sm">Social Mentions (weekly, 8+ values)</label>
+    <textarea id="sm">100, 110, 120, 150, 190, 260, 340, 450</textarea>
+  
+    <label for="st">Sell-Through (optional)</label>
+    <textarea id="st" placeholder="e.g. 0.1, 0.2, 0.45..."></textarea>
+  
+    <button id="run">Run Forecast</button>
+  </aside>
+
+  <main id="out" aria-live="polite">
+    <p class="empty">Enter your weekly dataand run a forecast.</p>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const nums = s => s.split(/[\s,;]+/).filter(Boolean).map(Number);
+  const STAGES = ["emerging", "growing", "peak", "declining"];
+  const GATE = 0.65;
+
+  // Generates SVG line charts; shaded area highlights the recent 4-week comparison window
+  function createLineChart(v, title) {
+    const W = 360, H = 170, p = { l: 38, r: 12, t: 14, b: 26 }, n = v.length;
+    const lo = Math.min(...v), hi = Math.max(...v), span = (hi - lo) || 1;
+    const x = i => p.l + i * (W - p.l - p.r) / (n - 1);
+    const y = t => H - p.b - (t - lo) / span * (H - p.t - p.b);
+    const pts = v.map((t, i) => `${x(i)},${y(t)}`).join(" ");
+    const bx = x(Math.max(0, n - 4));
+
+    return `
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}">
+        <rect x="${bx}" y="${p.t}" width="${W - p.r - bx}" height="${H - p.t - p.b}" fill="#E2D3B8" opacity=".6"/>
+        <line x1="${p.l}" y1="${H - p.b}" x2="${W - p.r}" y2="${H - p.b}" stroke="#7A6264"/>
+        <polygon points="${x(0)},${H - p.b} ${pts} ${x(n - 1)},${H - p.b}" fill="#6B1426" opacity=".13"/>
+        <polyline points="${pts}" fill="none" stroke="#6B1426" stroke-width="2.6" stroke-linejoin="round"/>
+        ${v.map((t, i) => `<circle cx="${x(i)}" cy="${y(t)}" r="3.2" fill="#6B1426"/>`).join("")}
+        <g font-size="10" fill="#7A6264">
+          <text x="${p.l - 5}" y="${y(hi) + 3}" text-anchor="end">${hi}</text>
+          <text x="${p.l - 5}" y="${y(lo) + 3}" text-anchor="end">${lo}</text>
+          <text x="${x(0)}" y="${H - 8}" text-anchor="middle">W1</text>
+          <text x="${x(n - 1)}" y="${H - 8}" text-anchor="middle">W${n}</text>
+          <text x="${bx + 4}" y="${p.t + 10}" fill="#45101C">last 4 weeks</text>
+        </g>
+      </svg>`;
+  }
+
+  // Generates half-circle momentum score gauge (0.0 to 1.0)
+  function createGauge(v) {
+    const arc = 'd="M20 100A80 80 0 0 1 180 100" pathLength="100" fill="none" stroke-width="16" stroke-linecap="round"';
+    return `
+      <svg viewBox="0 0 200 112" role="img" aria-label="Momentum gauge value ${v}">
+        <path ${arc} stroke="#E2D3B8"/>
+        <path ${arc} stroke="#6B1426" stroke-dasharray="${Math.max(v * 100, 0.01)} 100"/>
+        <text x="100" y="94" text-anchor="middle" font-family="Georgia,serif" font-size="34" fill="#45101C">${v.toFixed(2)}</text>
+      </svg>`;
+  }
+
+  // Render complete forecast dashboard
+  function renderDashboard(d, input) {
+    const m = d.decisions.mainstream_90d;
+    const mo = d.decisions.momentum;
+    const st = d.decisions.stage;
+    const rows = [
+      ["Mainstream in 90 days", m],
+      ["Momentum Score", mo],
+      ["Lifecycle Stage", st]
+    ];
+
+    $("out").innerHTML = `
+      <div class="top">
+        <div>
+          <h2 id="t"></h2>
+          <span id="c"></span>
+        </div>
+        <div class="gate ${d.needs_human_review ? "review" : "ok"}">
+          ${d.needs_human_review 
+            ? "Needs human review: a decision fell below confidence gate" 
+            : "All decisions passed confidence gate"}
+        </div>
+      </div>
+      <div class="verdicts">
+        <div>
+          <h3>Goes mainstream within 90 days?</h3>
+          <div class="big">${m.value ? "Likely" : "Unlikely"}</div>
+        </div>
+        <div>
+          <h3>Momentum</h3>
+          ${createGauge(mo.value)}
+        </div>
+        <div>
+          <h3>Lifecycle stage</h3>
+          <div class="track">
+            ${STAGES.map(s => `<i class="${s === st.value ? "on" : ""}">${s}</i>`).join("")}
+          </div>
+        </div>
+      </div>
+      <div class="charts">
+        <div>
+          <h3>Search interest</h3>
+          ${createLineChart(input.search_index, "Weekly search index")}
+        </div>
+        <div>
+          <h3>Social mentions</h3>
+          ${createLineChart(input.social_mentions, "Weekly social mentions")}
+        </div>
+        ${input.sell_through ? `
+          <div>
+            <h3>Sell-through</h3>
+            ${createLineChart(input.sell_through, "Weekly sell-through")}
+          </div>` : ""}
+      </div>
+      <div class="conf">
+        <h3>Confidence Scores <small>(line indicates ${GATE} threshold)</small></h3>
+        ${rows.map(([label, dec]) => `
+          <div class="bar">
+            <span>${label}</span>
+            <div class="track2">
+              <b class="${dec.low_confidence ? "low" : ""}" style="width:${dec.confidence * 100}%"></b>
+              <u style="left:${GATE * 100}%"></u>
+            </div>
+            <span>${dec.confidence.toFixed(2)}</span>
+          </div>`).join("")}
+      </div>
+      ${d.brief ? `<div class="brief"><h3>Executive brief</h3><p id="b"></p></div>` : ""}`;
+
+    // Safely populating user and model text strings
+    $("t").textContent = d.trend;
+    $("c").textContent = d.category;
+    if (d.brief) $("b").textContent = d.brief;
+  }
+
+  function showError(msg) {
+    $("out").innerHTML = `<div class="err" id="e"></div>`;
+    $("e").textContent = msg;
+  }
+
+  // Form Submision Handler
+  $("run").onclick = async () => {
+    const searchVals = nums($("si").value);
+    const socialVals = nums($("sm").value);
+    const sellVals = $("st").value.trim() ? nums($("st").value) : null;
+
+    // Client-side length validation matching FastAPI schema rules
+    if (searchVals.length < 8 || socialVals.length < 8) {
+      showError("Input error: Search index and Social mentions must each contain at least 8 numbers.");
+      return;
+    }
+
+    const inputPayload = {
+      name: $("name").value.trim(),
+      category: $("cat").value,
+      search_index: searchVals,
+      social_mentions: socialVals
+    };
+    if (sellVals) inputPayload.sell_through = sellVals;
+
+    const btn = $("run");
+    btn.disabled = true;
+    btn.textContent = "Running…";
+
+    try {
+      const response = await fetch("/forecast", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": $("key").value.trim()
+        },
+        body: JSON.stringify(inputPayload)
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        data = {};
+      }
+
+      if (response.status === 401) {
+        showError("API key rejected. Verify your key matches API_KEYS in your .env file.");
+      } else if (response.status === 422) {
+        showError("Validation failed: Please ensure each numerical series contains 8 or more items.");
+      } else if (!response.ok) {
+        showError(`Server error (${response.status}): ${data.detail || "Unable to complete forecast."}`);
+      } else {
+        renderDashboard(data, inputPayload);
+      }
+    } catch (e) {
+      showError("Could not connect to the API server. Ensure uvicorn is running on port 8000.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Run forecast";
+    }
+  };
+  </script>
+</body>
+</html>
